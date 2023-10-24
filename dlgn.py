@@ -185,6 +185,7 @@ def trainDLGN(train_data, train_data_labels, vali_data, vali_data_labels, test_d
 	set_torchseed(6675)
 	# set_torchseed(5449)
 	DLGN_init= DLGN_FC(input_dim=input_dim, output_dim=1, num_hidden_nodes=num_hidden_nodes, beta=beta)
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 	train_parameter_masks=dict()
 	for name,parameter in DLGN_init.named_parameters():
