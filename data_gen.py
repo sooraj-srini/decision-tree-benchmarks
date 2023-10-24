@@ -17,6 +17,7 @@ import argparse
 import sys
 
 from sklearn.svm import SVC
+from torch.utils.data import DataLoader, TensorDataset
 
 np.set_printoptions(precision=2)
 from sklearn.neighbors import KNeighborsClassifier
@@ -137,28 +138,28 @@ def data_gen_decision_tree(num_data=1000, dim=2, seed=0, w_list=None, b_list=Non
 num_data = 12000
 input_dim= 2
 # seeds = np.random.randint(0,10000,5)
-seeds=[1387]
-# seeds = [2318]
-for seed in seeds:
-	((data_x, labels), (w_list, b_list, vals), stats) = data_gen_decision_tree(
-												dim=input_dim, seed=seed, num_levels=4,
-												num_data=num_data)
-	seed_set=seed
-w_list_old = np.array(w_list)
-b_list_old = np.array(b_list)
+# seeds=[1387]
+# # seeds = [2318]
+# for seed in seeds:
+# 	((data_x, labels), (w_list, b_list, vals), stats) = data_gen_decision_tree(
+# 												dim=input_dim, seed=seed, num_levels=4,
+# 												num_data=num_data)
+# 	seed_set=seed
+# w_list_old = np.array(w_list)
+# b_list_old = np.array(b_list)
 
-num_data = len(data_x)
-num_train= num_data//2
-num_vali = num_data//4
-num_test = num_data//4
-train_data = data_x[:num_train,:]
-train_data_labels = labels[:num_train]
+# num_data = len(data_x)
+# num_train= num_data//2
+# num_vali = num_data//4
+# num_test = num_data//4
+# train_data = data_x[:num_train,:]
+# train_data_labels = labels[:num_train]
 
-vali_data = data_x[num_train:num_train+num_vali,:]
-vali_data_labels = labels[num_train:num_train+num_vali]
+# vali_data = data_x[num_train:num_train+num_vali,:]
+# vali_data_labels = labels[num_train:num_train+num_vali]
 
-test_data = data_x[num_train+num_vali :,:]
-test_data_labels = labels[num_train+num_vali :]
+# test_data = data_x[num_train+num_vali :,:]
+# test_data_labels = labels[num_train+num_vali :]
 
 def check(data_x, labels, w_list, b_list, vals):
     freq = np.zeros(len(vals))
@@ -178,3 +179,15 @@ def check(data_x, labels, w_list, b_list, vals):
         else:
             freq[current_index-1]+=1
     return True, freq
+
+def get_train_loader(train_data, train_data_labels, batch_size):
+        # Convert data and labels to PyTorch tensors
+	train_data_tensor = torch.tensor(train_data, dtype=torch.float32)
+	train_data_labels_tensor = torch.tensor(train_data_labels, dtype=torch.long)
+
+	# Create a TensorDataset from the data and labels tensors
+	dataset = TensorDataset(train_data_tensor, train_data_labels_tensor)
+
+	# Create a DataLoader from the dataset
+	loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+	return loader

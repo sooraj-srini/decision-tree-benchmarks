@@ -15,8 +15,10 @@ from tqdm import tqdm
 import os
 import argparse
 import sys
-
 from sklearn.svm import SVC
+from data_gen import *
+
+
 
 class DLGN_FC(nn.Module):
 	def __init__(self, input_dim=None, output_dim=None, num_hidden_nodes=[], beta=30, mode='pwc'):		
@@ -177,3 +179,256 @@ def train_dlgn (DLGN_obj, train_data_curr,vali_data_curr,test_data_curr,
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 	return train_losses, DLGN_obj_return, DLGN_obj_store
+
+
+def trainDLGN(train_data, train_data_labels, vali_data, vali_data_labels, test_data, test_data_labels, w_list_old=None, b_list_old=None):
+	set_torchseed(6675)
+	# set_torchseed(5449)
+	DLGN_init= DLGN_FC(input_dim=input_dim, output_dim=1, num_hidden_nodes=num_hidden_nodes, beta=beta)
+
+	train_parameter_masks=dict()
+	for name,parameter in DLGN_init.named_parameters():
+		if name[:5]=="value_"[:5]:
+			train_parameter_masks[name]=torch.ones_like(parameter) # Updating all value network layers
+		if name[:5]=="gating_"[:5]:
+			train_parameter_masks[name]=torch.ones_like(parameter)
+		train_parameter_masks[name].to(device)
+
+	set_torchseed(5000)
+	train_losses, DLGN_obj_final, DLGN_obj_store = train_dlgn(train_data_curr=train_data,
+												vali_data_curr=vali_data,
+												test_data_curr=test_data,
+												train_labels_curr=train_data_labels,
+												vali_labels_curr=vali_data_labels,
+												test_labels_curr=test_data_labels,
+												DLGN_obj=deepcopy(DLGN_init),
+												parameter_mask=train_parameter_masks)
+	torch.cuda.empty_cache() 
+
+	if not os.path.exists('outputs'):
+		os.mkdir('outputs')
+	# print(len(DLGN_obj_store))
+	# print("Hi")
+	device=torch.device('cpu')
+	train_outputs_values, train_outputs_gate_scores =DLGN_obj_final(torch.Tensor(train_data).to(device))
+	train_preds = train_outputs_values[-1]
+	criterion = nn.CrossEntropyLoss()
+	outputs = torch.cat((-1*train_preds,train_preds), dim=1)
+	targets = torch.tensor(train_data_labels, dtype=torch.int64)
+	train_loss = criterion(outputs, targets)
+	train_preds = train_preds.detach().numpy()
+	filename = 'outputs/'+filename_suffix+'.txt'
+	original_stdout = sys.stdout
+	with open(filename,'w') as f:
+		sys.stdout = f
+		print("Setup:")
+		print("Num neurons : ", DLGN_obj_final.num_nodes)
+		print(" Beta :", DLGN_obj_final.beta)
+		print(" lr :", lr)
+		print("=======================")
+		print(train_losses)
+		print("==========Best validated model=============")
+		print("Train error=",np.sum(train_data_labels != (np.sign(train_preds[:,0])+1)//2 ))
+		print("Train loss = ", train_loss)
+		print("Num_train_data=",len(train_data_labels))
+		sys.stdout = original_stdout
+
+
+	test_outputs_values, test_outputs_gate_scores =DLGN_obj_final(torch.Tensor(test_data))
+	test_preds = test_outputs_values[-1]
+	test_preds = test_preds.detach().numpy()
+	filename = 'outputs/'+filename_suffix+'.txt'
+	original_stdout = sys.stdout
+	with open(filename,'a') as f:
+		sys.stdout = f
+		print("Test error=",np.sum(test_data_labels != (np.sign(test_preds[:,0])+1)//2 ))
+		print("Num_test_data=",len(test_data_labels))
+		sys.stdout = original_stdout
+
+	w_list = np.concatenate((w_list_old,-w_list_old),axis=0)
+
+	effective_weights, effective_biases = DLGN_obj_store[0].return_gating_functions()
+	wts_list_init=[]
+	for layer in range(0,len(effective_weights)):
+		wts =  np.array(effective_weights[layer].data.detach().numpy())
+		wts /= np.linalg.norm(wts, axis=1)[:,None]
+		wts_list_init.append(wts)
+	wts_list_init = np.concatenate(wts_list_init)
+
+
+	effective_weights, effective_biases = DLGN_obj_final.return_gating_functions()
+
+	wts_list=[]
+	for layer in range(len(effective_weights)):
+		wts =  np.array(effective_weights[layer].data.detach().numpy())
+		wts /= np.linalg.norm(wts, axis=1)[:,None]
+		wts_list.append(wts)
+	wts_list = np.concatenate(wts_list)
+
+	pd0 =  pairwise_distances(w_list,wts_list_init)
+	pd1 =  pairwise_distances(w_list,wts_list)
+
+
+	filename = 'outputs/'+filename_suffix+'.txt'
+	original_stdout = sys.stdout
+	with open(filename,'a') as f:
+		sys.stdout = f
+		print("Shape of decision tree node hyperplanes ", w_list.shape)
+		print("Shape of all halfspace directions of DLGN", wts_list.shape)
+		print("Distance of closest init DLGN halfspace to each labelling func hyperplane \n", pd0.min(axis=1)[:len(w_list_old)])
+		print(pd0.min(axis=1)[len(w_list_old):])
+		print("Distance of closest lrnd DLGN halfspace to each labelling func hyperplane \n", pd1.min(axis=1)[:len(w_list_old)])
+		print(pd1.min(axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.8 of the Dtree hyperplanes \n", np.sum(pd1<0.8, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.8, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.6 of the Dtree hyperplanes \n", np.sum(pd1<0.6, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.6, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.4 of the Dtree hyperplanes \n", np.sum(pd1<0.4, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.4, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.3 of the Dtree hyperplanes \n", np.sum(pd1<0.3, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.3, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.2 of the Dtree hyperplanes \n", np.sum(pd1<0.2, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.2, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.1 of the Dtree hyperplanes \n", np.sum(pd1<0.1, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.1, axis=1)[len(w_list_old):])
+		print("=========================================")
+		sys.stdout = original_stdout
+
+	# Learned feature statistics of init model
+	epoch_index=0
+	effective_weights, effective_biases = DLGN_obj_store[epoch_index].return_gating_functions()
+	wts_list=[]
+	for layer in range(len(effective_weights)):
+		wts =  np.array(effective_weights[layer].data.detach().numpy())
+		wts /= np.linalg.norm(wts, axis=1)[:,None]
+		wts_list.append(wts)
+	wts_list = np.concatenate(wts_list)
+	pd0 =  pairwise_distances(w_list,wts_list_init)
+	pd1 =  pairwise_distances(w_list,wts_list)
+	pd_w_list = pairwise_distances(w_list, w_list)
+
+
+	filename = 'outputs/'+filename_suffix+'.txt'
+	original_stdout = sys.stdout
+	with open(filename,'a') as f:
+		sys.stdout = f
+		print("===================================")
+		print("Initial epoch")
+		print(epoch_index)
+		print("===================================")
+		train_outputs_values, train_outputs_gate_scores =DLGN_obj_store[epoch_index](torch.Tensor(train_data).to(device))
+		train_preds = train_outputs_values[-1]
+		criterion = nn.CrossEntropyLoss()
+		outputs = torch.cat((-1*train_preds,train_preds), dim=1)
+		targets = torch.tensor(train_data_labels, dtype=torch.int64)
+		train_loss = criterion(outputs, targets)
+		train_preds = train_preds.detach().numpy()
+		test_outputs_values, test_outputs_gate_scores =DLGN_obj_store[epoch_index](torch.Tensor(test_data))
+		test_preds = test_outputs_values[-1]
+		test_preds = test_preds.detach().numpy()
+		print("Train error=",np.sum(train_data_labels != (np.sign(train_preds[:,0])+1)//2 ))
+		print("Num_train_data=",len(train_data_labels))
+		print("Train loss=",train_loss.detach())
+		print("Test error=",np.sum(test_data_labels != (np.sign(test_preds[:,0])+1)//2 ))
+		print("Num_test_data=",len(test_data_labels))
+		print("===================================")
+		print("Shape of decision tree node hyperplanes ", w_list.shape)
+		print("Shape of all halfspace directions of DLGN", wts_list.shape)
+		print("Distance of closest init DLGN halfspace to each labelling func hyperplane \n", pd0.min(axis=1)[:len(w_list_old)])
+		print(pd0.min(axis=1)[len(w_list_old):])
+		print("Distance of closest lrnd DLGN halfspace to each labelling func hyperplane \n", pd1.min(axis=1)[:len(w_list_old)])
+		print(pd1.min(axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.8 of the Dtree hyperplanes \n", np.sum(pd1<0.8, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.8, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.6 of the Dtree hyperplanes \n", np.sum(pd1<0.6, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.6, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.4 of the Dtree hyperplanes \n", np.sum(pd1<0.4, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.4, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.3 of the Dtree hyperplanes \n", np.sum(pd1<0.3, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.3, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.2 of the Dtree hyperplanes \n", np.sum(pd1<0.2, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.2, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.1 of the Dtree hyperplanes \n", np.sum(pd1<0.1, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.1, axis=1)[len(w_list_old):])
+		print("=========================================")
+		sys.stdout = original_stdout    
+
+	# Learned feature statistics of last iteration model
+	epoch_index=len(DLGN_obj_store)-1
+	effective_weights, effective_biases = DLGN_obj_store[epoch_index].return_gating_functions()
+	wts_list=[]
+	for layer in range(len(effective_weights)):
+		wts =  np.array(effective_weights[layer].data.detach().numpy())
+		wts /= np.linalg.norm(wts, axis=1)[:,None]
+		wts_list.append(wts)
+	wts_list = np.concatenate(wts_list)
+
+	pd0 =  pairwise_distances(w_list,wts_list_init)
+	pd1 =  pairwise_distances(w_list,wts_list)
+	pd_w_list = pairwise_distances(w_list, w_list)
+	w_list_random = np.random.standard_normal(w_list.shape)
+	w_list_random /= np.linalg.norm(w_list_random, axis=1)[:,None]
+
+	pd4 = pairwise_distances(w_list_random,wts_list)
+
+
+	filename = 'outputs/'+filename_suffix+'.txt'
+	original_stdout = sys.stdout
+	with open(filename,'a') as f:
+		sys.stdout = f
+		print("===================================")
+		print("last epoch: Training loss = ", train_losses[-1])
+		print(epoch_index)
+		print(saved_epochs[epoch_index])
+		print("===================================")
+		train_outputs_values, train_outputs_gate_scores =DLGN_obj_store[epoch_index](torch.Tensor(train_data).to(device))
+		train_preds = train_outputs_values[-1]
+		criterion = nn.CrossEntropyLoss()
+		outputs = torch.cat((-1*train_preds,train_preds), dim=1)
+		targets = torch.tensor(train_data_labels, dtype=torch.int64)
+		train_loss = criterion(outputs, targets)
+		train_preds = train_preds.detach().numpy()
+		test_outputs_values, test_outputs_gate_scores =DLGN_obj_store[epoch_index](torch.Tensor(test_data))
+		test_preds = test_outputs_values[-1]
+		test_preds = test_preds.detach().numpy()
+		print("Train error=",np.sum(train_data_labels != (np.sign(train_preds[:,0])+1)//2 ))
+		print("Num_train_data=",len(train_data_labels))
+		print("Train loss=",train_loss.detach())
+		print("Test error=",np.sum(test_data_labels != (np.sign(test_preds[:,0])+1)//2 ))
+		print("Num_test_data=",len(test_data_labels))
+		print("===================================")
+
+		print("Shape of decision tree node hyperplanes ", w_list.shape)
+		print("Shape of all halfspace directions of DLGN", wts_list.shape)
+		print("Distance of closest init DLGN halfspace to each labelling func hyperplane \n", pd0.min(axis=1)[:len(w_list_old)])
+		print(pd0.min(axis=1)[len(w_list_old):])
+		print("Distance of closest lrnd DLGN halfspace to each labelling func hyperplane \n", pd1.min(axis=1)[:len(w_list_old)])
+		print(pd1.min(axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.8 of the Dtree hyperplanes \n", np.sum(pd1<0.8, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.8, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.6 of the Dtree hyperplanes \n", np.sum(pd1<0.6, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.6, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.4 of the Dtree hyperplanes \n", np.sum(pd1<0.4, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.4, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.3 of the Dtree hyperplanes \n", np.sum(pd1<0.3, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.3, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.2 of the Dtree hyperplanes \n", np.sum(pd1<0.2, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.2, axis=1)[len(w_list_old):])
+		print("Number of halfspaces within distance 0.1 of the Dtree hyperplanes \n", np.sum(pd1<0.1, axis=1)[:len(w_list_old)])
+		print(np.sum(pd1<0.1, axis=1)[len(w_list_old):])
+
+
+		print("=========================================")
+		print("No. of halfspaces within distance 0.8 of a random Dtree hyperplanes \n", np.sum(pd4<0.8, axis=1)[:len(w_list_old)])
+		print(np.sum(pd4<0.8, axis=1)[len(w_list_old):])
+		print("No. of halfspaces within distance 0.6 of a random Dtree hyperplanes \n", np.sum(pd4<0.6, axis=1)[:len(w_list_old)])
+		print(np.sum(pd4<0.6, axis=1)[len(w_list_old):])
+		print("No. of halfspaces within distance 0.4 of a random Dtree hyperplanes \n", np.sum(pd4<0.4, axis=1)[:len(w_list_old)])
+		print(np.sum(pd4<0.4, axis=1)[len(w_list_old):])
+		print("No. of halfspaces within distance 0.3 of a random Dtree hyperplanes \n", np.sum(pd4<0.3, axis=1)[:len(w_list_old)])
+		print(np.sum(pd4<0.3, axis=1)[len(w_list_old):])
+		print("No. of halfspaces within distance 0.2 of a random Dtree hyperplanes \n", np.sum(pd4<0.2, axis=1)[:len(w_list_old)])
+		print(np.sum(pd4<0.2, axis=1)[len(w_list_old):])
+		print("No. of halfspaces within distance 0.1 of a random Dtree hyperplanes \n", np.sum(pd4<0.1, axis=1)[:len(w_list_old)])
+		print(np.sum(pd4<0.1, axis=1)[len(w_list_old):])
+		sys.stdout = original_stdout    
