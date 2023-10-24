@@ -10,7 +10,7 @@ from sklearn.metrics import get_scorer
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, export_text
 from sklearn.utils import check_X_y
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 
 from arguments import check_fit_arguments
 
@@ -138,8 +138,8 @@ class TaoTree(BaseEstimator):
             print('starting score', self.model.score(X, y))
         for i in range(self.n_iters):
             num_updates = self._tao_iter_cart(X, y, self.model.tree_, sample_weight=sample_weight)
-            if num_updates == 0:
-                break
+            # if num_updates == 0:
+                # break
 
         return self
 
@@ -271,8 +271,8 @@ class TaoTree(BaseEstimator):
             # screen out indexes where going left/right has no effect
             idxs_relevant = y_node_absolute_errors[:, 0] != y_node_absolute_errors[:, 1]
             if idxs_relevant.sum() <= 1:  # nothing to change
-                if self.verbose:
-                    print('no errors to change')
+                # if self.verbose:
+                    # print('no errors to change')
                 continue
             # assert np.all((self.model.predict(X) != y)[idxs_relevant]), 'relevant indexes should be errors'
             y_node_target = np.argmin(y_node_absolute_errors, axis=1)
@@ -321,7 +321,7 @@ class TaoTree(BaseEstimator):
                 continue
                 
             m = LogisticRegression(**self.node_model_args)
-            # m = SVC(kernel='linear')
+            # m = LinearSVC(penalty="l1", dual=False)
             m.fit(X_node, y_node_target)
             prev_score = np.mean((np.dot(X_node, self.weights[node_id]) >= threshold[node_id]) == y_node_target)
             cur_score = m.score(X_node, y_node_target)
