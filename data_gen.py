@@ -10,7 +10,6 @@ from copy import deepcopy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 from tqdm import tqdm
 import os
 import argparse
@@ -23,11 +22,12 @@ np.set_printoptions(precision=2)
 from sklearn.neighbors import KNeighborsClassifier
 
 class Args:
-    def __init__(self):
-        self.numlayer=4
-        self.numnodes=50
-        self.beta=3.
-        self.lr=0.001       
+	def __init__(self):
+		self.numlayer=4
+		self.numnodes=50
+		self.beta=3.
+		self.lr=0.001       
+		self.input_dim=2
 
 args =  Args()
 
