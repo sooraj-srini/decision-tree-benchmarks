@@ -23,24 +23,33 @@ class trainLCN:
         test_loader = get_train_loader(test_data, test_data_labels, batch_size=32)
 
         best_score = 100000
+        best_model = None
         for epoch in range(0, 10):
-                scheduler.step(epoch)
+            scheduler.step(epoch)
 
-                train_approximate_loss = train(model, device, train_loader, optimizer, epoch, 'none',1)
-                # used for plotting learning curves
-                train_loss, train_score = test(model, device, train_loader, 'train')
-                valid_loss, valid_score = test(model, device, valid_loader, 'valid')
-                test_loss, test_score = test(model, device, test_loader, 'test')
-                
-                # early stopping version
-                if valid_score > best_score:
-                    state = {'model': model.state_dict()}
-                    torch.save(state, "best_lcn.pt")
-                    best_score = valid_score
-
-                # "convergent" version
+            train_approximate_loss = train(model, device, train_loader, optimizer, epoch, 'none',1)
+            # used for plotting learning curves
+            train_loss, train_score = test(model, device, train_loader, 'train')
+            valid_loss, valid_score = test(model, device, valid_loader, 'valid')
+            test_loss, test_score = test(model, device, test_loader, 'test')
+            
+            # early stopping version
+            if valid_score > best_score:
+                best_model =  model
                 state = {'model': model.state_dict()}
-                torch.save(state, "last_lcn.pt")
-                print(train_loss, train_score, valid_loss, valid_score, test_loss, test_score)
+                torch.save(state, "best_lcn.pt")
+                best_score = valid_score
+
+            # "convergent" version
+            state = {'model': model.state_dict()}
+            torch.save(state, "last_lcn.pt")
+            # print(train_loss, train_score, valid_loss, valid_score, test_loss, test_score)
+        train_loss, train_score = test(model, device, train_loader, 'train')
+        valid_loss, valid_score = test(model, device, valid_loader, 'valid')
+        test_loss, test_score = test(model, device, test_loader, 'test')
+        print("Best train score:", train_score)
+        print("Best valid score:", valid_score)
+        print("Best test score:", test_score)
+
 
 
