@@ -9,7 +9,7 @@ class trainSVM:
     def train(self, train_data, train_data_labels, vali_data, vali_data_labels, test_data, test_data_labels, w_list_old=None, b_list_old=None):
         kernels = ['linear', 'poly', 'rbf', 'sigmoid']
         for kernel in kernels:
-            parameters = {'kernel': [kernel], 'C': [0.1, 1, 10, 100, 1000], 'gamma': [0.01, 0.001, 0.0001], 'degree': [2,3]}
+            parameters = {'kernel': [kernel], 'C': [0.1, 1, 10, 100, 1000], 'gamma': [0.1, 0.01, 0.001, 0.0001], 'degree': [2,3, 4]}
             svc = SVC()
             clf = GridSearchCV(svc, parameters)
             clf.fit(train_data, train_data_labels)

@@ -38,11 +38,11 @@ class trainLatentTree:
         best_model = None
         best_height = 0
         best_acc = 0
-        for h in range(8, 10):
+        for h in range(5, 6):
             print(f"Current depth: {h}")
             model = LTBinaryClassifier(h, self.input_dim, reg=0.001, linear=True, split_func='linear', comp_func='concatenate')
-            optimizer = torch.optim.SGD(model.parameters(), lr=0.5)
-            train_batch(train_data, train_data_labels, model, optimizer, criterion, monitor=monitor)    
+            optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
+            train_batch(train_data, train_data_labels, model, optimizer, criterion, nb_iter=1000, monitor=monitor)    
 
             valid_acc = test_LatentTree(model, valid_loader)
             test_acc = test_LatentTree(model, test_loader)

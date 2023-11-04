@@ -12,14 +12,15 @@ import kernel
 
 if __name__ == '__main__':
 
-    algorithms = [dlgn.trainDLGN, lcn.trainLCN, latent.trainLatentTree, tao.trainTAO, kernel.trainSVM]
+    # algorithms = [dlgn.trainDLGN, lcn.trainLCN, latent.trainLatentTree, tao.trainTAO, kernel.trainSVM]
+    algorithms = [latent.trainLatentTree]
     args = Args()
     args.numlayer = 4
     args.numnodes = 50
     args.beta = 3.
     args.lr = 0.001
     args.input_dim = 2
-    for height in [2 ,3, 4]:
+    for height in [3, 4]:
         for input_dim in [2, 3, 4]:
             for num_data in [6000, 20000, 100000]:
                 for algo in algorithms:
@@ -40,9 +41,9 @@ if __name__ == '__main__':
                     b_list_old = np.array(b_list)
 
                     num_data = len(data_x)
-                    num_train= num_data//2
-                    num_vali = num_data//4
-                    num_test = num_data//4
+                    num_train= (num_data*7)//10
+                    num_vali = (num_data*21)//100
+                    num_test = (num_data*9)//100
                     train_data = data_x[:num_train,:]
                     train_data_labels = labels[:num_train]
 

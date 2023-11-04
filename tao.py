@@ -11,7 +11,7 @@ class trainTAO:
         best_acc = 0
         best_model = None
         best_height = 0
-        for h in range(2, 10):
+        for h in range(5, 10):
             print(f"Current height: {h}")
             m = TaoTreeClassifier(randomize_tree=False, weight_errors=False,
                                     node_model='linear', model_args={'max_depth': h},
