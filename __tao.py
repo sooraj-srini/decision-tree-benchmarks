@@ -296,8 +296,8 @@ class TaoTree(BaseEstimator):
                     elif self.node_model == 'stump':
                         m = DecisionTreeRegressor(max_depth=1, **self.node_model_args)
                 X_node_single_feat = X_node[:, feat_num: feat_num + 1]
-                m.fit(X_node_single_feat, y_node_target, sample_weight=sample_weight_node_target)
-                score = m.score(X_node_single_feat, y_node_target, sample_weight=sample_weight_node_target)
+                m.fit(X_node_single_feat, y_node_target)
+                score = m.score(X_node_single_feat, y_node_target)
                 if score > best_score:
                     best_score = score
                     best_feat_num = feat_num
