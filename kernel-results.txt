@@ -1,60 +1,189 @@
-4_50_3_1.0e-03
-cpu
-Current algorithm: <class 'kernel.trainSVM'>
+Current algorithm: <class '__main__.trainSVM'>
 Current height: 2
-Current input_dim: 2
+Current input_dim:  2
 Current num_data: 6000
-0.8848674525558149 0.7423035474314879 -0.9340161513391072
-0.8856046815898853 1.0006225583207224 -0.5210032898794541
-{'C': 1, 'degree': 2, 'gamma': 0.1, 'kernel': 'linear'}
-0.5297619047619048
-Train accuracy: 0.5288095238095238
-Validation accuracy: 0.530952380952381
-Test accuracy: 0.5092592592592593
-{'C': 1000, 'degree': 4, 'gamma': 0.1, 'kernel': 'poly'}
-0.621904761904762
-Train accuracy: 0.6180952380952381
-Validation accuracy: 0.6023809523809524
-Test accuracy: 0.6481481481481481
-{'C': 1000, 'degree': 2, 'gamma': 0.1, 'kernel': 'rbf'}
-0.7302380952380954
 Train accuracy: 0.7352380952380952
-Validation accuracy: 0.7095238095238096
-Test accuracy: 0.7203703703703703
-{'C': 1000, 'degree': 2, 'gamma': 0.001, 'kernel': 'sigmoid'}
-0.5295238095238095
-Train accuracy: 0.5288095238095238
-Validation accuracy: 0.530952380952381
-Test accuracy: 0.5092592592592593
-Current algorithm: <class 'kernel.trainSVM'>
+Validation accuracy: 0.7092592592592593
+Test accuracy: 0.7142857142857143
+Current algorithm: <class '__main__.trainSVM'>
 Current height: 2
-Current input_dim: 2
+Current input_dim:  2
 Current num_data: 20000
-0.8848674525558149 0.7423035474314879 -0.9340161513391072
-0.8852007155716575 1.010495098776196 -0.5155105136328186
-{'C': 1, 'degree': 2, 'gamma': 0.1, 'kernel': 'linear'}
-0.5232857142857144
-Train accuracy: 0.5238571428571429
-Validation accuracy: 0.5271428571428571
-Test accuracy: 0.5316666666666666
-{'C': 1000, 'degree': 4, 'gamma': 0.1, 'kernel': 'poly'}
-0.629357142857143
-Train accuracy: 0.63
-Validation accuracy: 0.6288095238095238
-Test accuracy: 0.6427777777777778
-{'C': 1000, 'degree': 2, 'gamma': 0.1, 'kernel': 'rbf'}
-0.737642857142857
 Train accuracy: 0.7405714285714285
-Validation accuracy: 0.7385714285714285
-Test accuracy: 0.7516666666666667
-{'C': 1000, 'degree': 2, 'gamma': 0.001, 'kernel': 'sigmoid'}
-0.5232857142857144
-Train accuracy: 0.5237142857142857
-Validation accuracy: 0.5271428571428571
-Test accuracy: 0.5316666666666666
-Current algorithm: <class 'kernel.trainSVM'>
+Validation accuracy: 0.7322222222222222
+Test accuracy: 0.746904761904762
+Current algorithm: <class '__main__.trainSVM'>
 Current height: 2
-Current input_dim: 2
+Current input_dim:  2
 Current num_data: 100000
-0.8848674525558149 0.7423035474314879 -0.9340161513391072
-0.8822555343467451 1.0226635821539487 -0.5154375221157663
+Train accuracy: 0.7530571428571429
+Validation accuracy: 0.7527777777777778
+Test accuracy: 0.7574761904761905
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 2
+Current input_dim:  3
+Current num_data: 6000
+Train accuracy: 0.8042857142857143
+Validation accuracy: 0.812962962962963
+Test accuracy: 0.8285714285714286
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 2
+Current input_dim:  3
+Current num_data: 20000
+Train accuracy: 0.8321428571428572
+Validation accuracy: 0.8233333333333334
+Test accuracy: 0.8269047619047619
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 2
+Current input_dim:  3
+Current num_data: 100000
+Train accuracy: 0.8501857142857143
+Validation accuracy: 0.8462222222222222
+Test accuracy: 0.85
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 2
+Current input_dim:  4
+Current num_data: 6000
+Train accuracy: 0.8509523809523809
+Validation accuracy: 0.8166666666666667
+Test accuracy: 0.8388888888888889
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 2
+Current input_dim:  4
+Current num_data: 20000
+Train accuracy: 0.8515714285714285
+Validation accuracy: 0.8516666666666667
+Test accuracy: 0.8507142857142858
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 2
+Current input_dim:  4
+Current num_data: 100000
+Train accuracy: 0.8584857142857143
+Validation accuracy: 0.8632222222222222
+Test accuracy: 0.8606190476190476
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  2
+Current num_data: 6000
+Train accuracy: 0.7352380952380952
+Validation accuracy: 0.7092592592592593
+Test accuracy: 0.7142857142857143
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  2
+Current num_data: 20000
+Train accuracy: 0.7405714285714285
+Validation accuracy: 0.7322222222222222
+Test accuracy: 0.746904761904762
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  2
+Current num_data: 100000
+Train accuracy: 0.7530571428571429
+Validation accuracy: 0.7527777777777778
+Test accuracy: 0.7574761904761905
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  3
+Current num_data: 6000
+Train accuracy: 0.8042857142857143
+Validation accuracy: 0.812962962962963
+Test accuracy: 0.8285714285714286
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  3
+Current num_data: 20000
+Train accuracy: 0.8321428571428572
+Validation accuracy: 0.8233333333333334
+Test accuracy: 0.8269047619047619
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  3
+Current num_data: 100000
+Train accuracy: 0.8501857142857143
+Validation accuracy: 0.8462222222222222
+Test accuracy: 0.85
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  4
+Current num_data: 6000
+Train accuracy: 0.8509523809523809
+Validation accuracy: 0.8166666666666667
+Test accuracy: 0.8388888888888889
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  4
+Current num_data: 20000
+Train accuracy: 0.8515714285714285
+Validation accuracy: 0.8516666666666667
+Test accuracy: 0.8507142857142858
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 3
+Current input_dim:  4
+Current num_data: 100000
+Train accuracy: 0.8584857142857143
+Validation accuracy: 0.8632222222222222
+Test accuracy: 0.8606190476190476
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  2
+Current num_data: 6000
+Train accuracy: 0.7352380952380952
+Validation accuracy: 0.7092592592592593
+Test accuracy: 0.7142857142857143
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  2
+Current num_data: 20000
+Train accuracy: 0.7405714285714285
+Validation accuracy: 0.7322222222222222
+Test accuracy: 0.746904761904762
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  2
+Current num_data: 100000
+Train accuracy: 0.7530571428571429
+Validation accuracy: 0.7527777777777778
+Test accuracy: 0.7574761904761905
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  3
+Current num_data: 6000
+Train accuracy: 0.8042857142857143
+Validation accuracy: 0.812962962962963
+Test accuracy: 0.8285714285714286
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  3
+Current num_data: 20000
+Train accuracy: 0.8321428571428572
+Validation accuracy: 0.8233333333333334
+Test accuracy: 0.8269047619047619
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  3
+Current num_data: 100000
+Train accuracy: 0.8501857142857143
+Validation accuracy: 0.8462222222222222
+Test accuracy: 0.85
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  4
+Current num_data: 6000
+Train accuracy: 0.8509523809523809
+Validation accuracy: 0.8166666666666667
+Test accuracy: 0.8388888888888889
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  4
+Current num_data: 20000
+Train accuracy: 0.8515714285714285
+Validation accuracy: 0.8516666666666667
+Test accuracy: 0.8507142857142858
+Current algorithm: <class '__main__.trainSVM'>
+Current height: 4
+Current input_dim:  4
+Current num_data: 100000
+Train accuracy: 0.8584857142857143
+Validation accuracy: 0.8632222222222222
+Test accuracy: 0.8606190476190476

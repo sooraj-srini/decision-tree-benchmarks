@@ -20,6 +20,14 @@ from torch.utils.data import DataLoader, TensorDataset
 
 np.set_printoptions(precision=2)
 from sklearn.neighbors import KNeighborsClassifier
+import matplotlib.pyplot as plt
+def visualize(data_x, labels):
+    class_0 = data_x[labels == 0]
+    class_1 = data_x[labels == 1]
+
+    plt.scatter(class_0[:, 0], class_0[:, 1])
+    plt.scatter(class_1[:, 0], class_1[:, 1])
+    plt.show()
 
 class Args:
 	def __init__(self):
